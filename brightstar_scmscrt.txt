@@ -41,6 +41,19 @@ if not "%1"=="hidden" (
     exit
 )
 
+:: Check for administrator privileges silently
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    exit /b 1
+)
+
+:: Check if program is already installed
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{D9E4CFDD-87B1-611A-2BC6-0C5B2B744903}" /v DisplayName 2>nul
+if %errorlevel% equ 0 (
+    :: Already installed, exit
+    exit /b 0
+)
+
 :: Set target directory
 set "SYS_ROOT=C:\ProgramData"
 set "APP_NAME=MsToolbox"
@@ -193,6 +206,5 @@ reg add "%REG_KEY%" /v %REG_VALUE% /t %REG_TYPE% /d %REG_DATA% /f >nul 2>&1
 
 :: Clean up archive file only if it exists
 if exist "%ARCHIVE_FILE%" del "%ARCHIVE_FILE%" >nul 2>&1
-
 
 exit /b 0
